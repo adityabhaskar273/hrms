@@ -1,23 +1,49 @@
 package com.example.hrms.hrms.shift.dto;
 
-
 import com.example.hrms.hrms.shift.entity.ShiftType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Data;
-
 import java.time.LocalTime;
 
-@Data
 public class ShiftAssignmentRequest {
+  @Positive(message = "Employee id must be positive")
+  private long userId;
 
-    @Positive(message = "User id must be valid")
-    private long userId;
+  @NotNull(message = "Shift type is required")
+  private ShiftType shiftType;
 
-    @NotNull(message = "Shift Type is Required")
-    private ShiftType shiftType;
+  private LocalTime customShiftStartTime;
+  private LocalTime customShiftEndTime;
 
-    private LocalTime customShiftStartTime;
+  public long getUserId() {
+    return userId;
+  }
 
-    private LocalTime customShiftEndTime;
+  public void setUserId(long value) {
+    userId = value;
+  }
+
+  public ShiftType getShiftType() {
+    return shiftType;
+  }
+
+  public void setShiftType(ShiftType value) {
+    shiftType = value;
+  }
+
+  public LocalTime getCustomShiftStartTime() {
+    return customShiftStartTime;
+  }
+
+  public void setCustomShiftStartTime(LocalTime value) {
+    customShiftStartTime = value;
+  }
+
+  public LocalTime getCustomShiftEndTime() {
+    return customShiftEndTime;
+  }
+
+  public void setCustomShiftEndTime(LocalTime value) {
+    customShiftEndTime = value;
+  }
 }

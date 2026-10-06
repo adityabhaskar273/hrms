@@ -1,23 +1,19 @@
 package com.example.hrms.hrms.salary.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-
-@Data
-@AllArgsConstructor
-public class SalaryResponse {
-
-    private long userId;
-    private int month;
-    private int year;
-    private int totalWorkingDays;
-    private int payableDays;
-    private int unpaidDays;
-    private BigDecimal monthlySalary;
-    private BigDecimal payableSalary;
-
-
-}
+public record SalaryResponse(
+    long employeeId,
+    String employeeName,
+    int month,
+    int year,
+    int totalWorkingDays,
+    int fullPayDays,
+    int halfPayDays,
+    int unpaidDays,
+    int overtimeAchievementDays,
+    BigDecimal overtimeHours,
+    BigDecimal monthlySalary,
+    BigDecimal payableSalary,
+    LocalDateTime calculatedAt) {}

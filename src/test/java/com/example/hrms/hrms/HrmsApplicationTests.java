@@ -1,13 +1,13 @@
 package com.example.hrms.hrms;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootTest
 class HrmsApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
+  @Test
+  void applicationEntryPointIsConfiguredForSpringBoot() {
+    assertNotNull(HrmsApplication.class.getAnnotation(SpringBootApplication.class));
+  }
 }

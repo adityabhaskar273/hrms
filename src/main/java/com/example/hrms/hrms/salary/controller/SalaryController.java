@@ -1,39 +1,28 @@
 package com.example.hrms.hrms.salary.controller;
 
-
-import com.example.hrms.hrms.salary.dto.SalaryCalculationRequest;
-import com.example.hrms.hrms.salary.dto.SalaryResponse;
-import com.example.hrms.hrms.salary.entity.Salary;
-import com.example.hrms.hrms.salary.repository.SalaryRepository;
+import com.example.hrms.hrms.salary.dto.*;
 import com.example.hrms.hrms.salary.service.SalaryService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/salary")
-@RequiredArgsConstructor
+@RequestMapping("/api/payroll")
 public class SalaryController {
+  private final SalaryService service;
 
-    private final SalaryService salaryService;
+  public SalaryController(SalaryService s) {
+    service = s;
+  }
 
-    @PostMapping("/calculate")
-    public ResponseEntity<SalaryResponse> calculateSalary(
-            @Valid @RequestBody SalaryCalculationRequest salaryCalculationRequest){
-        SalaryResponse response = salaryService.calculateSalary(salaryCalculationRequest);
+  @PostMapping("/calculate")
+  public ResponseEntity<PayrollResponse> calculate(@Valid @RequestBody SalaryCalculationRequest r) {
+    return ResponseEntity.ok(service.calculateSalary(r));
+  }
 
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<SalaryResponse> getSalary(
-            @PathVariable long userId,
-            @RequestParam int month,
-            @RequestParam int year){
-
-        SalaryResponse response = salaryService.getSalary(userId, month, year);
-
-        return ResponseEntity.ok(response);
-    }
+  @GetMapping("/employees/{employeeId}")
+  public ResponseEntity<SalaryResponse> get(
+      @PathVariable long employeeId, @RequestParam int month, @RequestParam int year) {
+    return ResponseEntity.ok(service.getSalary(employeeId, month, year));
+  }
 }

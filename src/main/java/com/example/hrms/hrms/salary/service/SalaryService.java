@@ -1,15 +1,9 @@
 package com.example.hrms.hrms.salary.service;
 
-import com.example.hrms.hrms.salary.dto.SalaryCalculationRequest;
-import com.example.hrms.hrms.salary.dto.SalaryResponse;
+import com.example.hrms.hrms.salary.dto.*;
 
 public interface SalaryService {
+  PayrollResponse calculateSalary(SalaryCalculationRequest request);
 
-    SalaryResponse calculateSalary(
-            SalaryCalculationRequest salaryCalculationRequest
-    );
-
-    SalaryResponse getSalary(
-            long userId, int month, int year
-    );
+  SalaryResponse getSalary(long employeeId, int month, int year);
 }

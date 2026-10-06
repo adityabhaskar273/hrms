@@ -1,21 +1,15 @@
 package com.example.hrms.hrms.login.attendance.dto;
 
-
-import jakarta.validation.constraints.NotNull;
-
-
+import jakarta.validation.constraints.Positive;
 
 public class AttendanceRequest {
+  @Positive private long userId;
 
-    @NotNull(message = "User ID is required")
-    private Long userId;
+  public long getUserId() {
+    return userId;
+  }
 
-    public Long getUserId(){
-        return userId;
-    }
-
-    public void setUserId(Long userId){
-        this.userId= userId;
-    }
-
+  public void setUserId(long id) {
+    userId = id;
+  }
 }

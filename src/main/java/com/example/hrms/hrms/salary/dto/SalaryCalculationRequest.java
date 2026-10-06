@@ -3,21 +3,27 @@ package com.example.hrms.hrms.salary.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
-import lombok.Data;
-import lombok.Getter;
 
-
-@Data
 public class SalaryCalculationRequest {
+  @Min(1)
+  @Max(12)
+  private int month;
 
-    @Positive(message = "User ID must be Valid")
-    private long userId;
+  @Positive private int year;
 
-    @Min(value = 1, message = "Month must be between 1 and 12")
-    @Max(value = 12, message = "Month must be between 1 and 12")
-    private int month;
+  public int getMonth() {
+    return month;
+  }
 
-    @Positive(message = "Year must be valid")
-    private int year;
+  public void setMonth(int x) {
+    month = x;
+  }
 
+  public int getYear() {
+    return year;
+  }
+
+  public void setYear(int x) {
+    year = x;
+  }
 }

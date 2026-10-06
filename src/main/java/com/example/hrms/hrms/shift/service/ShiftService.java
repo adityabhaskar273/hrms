@@ -4,5 +4,5 @@ import com.example.hrms.hrms.shift.dto.ShiftAssignmentRequest;
 
 public interface ShiftService {
 
-    String assignShift(ShiftAssignmentRequest shiftAssignmentRequest);
+  String assignShift(ShiftAssignmentRequest shiftAssignmentRequest);
 }

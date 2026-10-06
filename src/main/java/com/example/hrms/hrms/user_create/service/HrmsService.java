@@ -1,15 +1,10 @@
 package com.example.hrms.hrms.user_create.service;
 
-import com.example.hrms.hrms.user_create.Entity.User;
 import com.example.hrms.hrms.user_create.dto.CreateUserRequest;
-import org.springframework.stereotype.Service;
+import com.example.hrms.hrms.user_create.dto.EmployeeResponse;
 
-@Service
 public interface HrmsService {
+  EmployeeResponse createUser(CreateUserRequest request);
 
-    User createUser(CreateUserRequest createUserRequest);
-
-    String login(String username, String password);
-
-    String logout(String username, String password);
+  EmployeeResponse confirmOnboarding(long employeeId);
 }

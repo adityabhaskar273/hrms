@@ -1,113 +1,61 @@
 package com.example.hrms.hrms.login.attendance.service;
 
-import com.example.hrms.hrms.user_create.Entity.User;
-import com.example.hrms.hrms.login.attendance.dto.AttendanceRequest;
+import com.example.hrms.hrms.login.attendance.dto.*;
 import com.example.hrms.hrms.login.attendance.entity.Attendance;
-import com.example.hrms.hrms.login.attendance.entity.AttendanceStatus;
 import com.example.hrms.hrms.login.attendance.repository.AttendanceRepository;
+import com.example.hrms.hrms.user_create.Entity.User;
 import com.example.hrms.hrms.user_create.repository.UserRepository;
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
-public class AttendanceServiceImpl implements AttendanceService{
+public class AttendanceServiceImpl implements AttendanceService {
+  private final AttendanceRepository attendance;
+  private final UserRepository users;
 
-    private final AttendanceRepository attendanceRepository;
-    private final UserRepository userRepository;
+  public AttendanceServiceImpl(AttendanceRepository a, UserRepository u) {
+    attendance = a;
+    users = u;
+  }
 
-    public AttendanceServiceImpl(AttendanceRepository attendanceRepository, UserRepository userRepository){
-        this.attendanceRepository = attendanceRepository;
-        this.userRepository = userRepository;
+  @Override
+  @Transactional
+  public AttendanceResponse punch(AttendanceRequest r) {
+    User user =
+        users
+            .findByIdForUpdate(r.getUserId())
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+    if (!user.isActive())
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Employee onboarding is not confirmed");
+    var open = attendance.findOpenSessions(user.getId());
+    if (open.size() > 1)
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Multiple open attendance sessions require correction");
+    LocalDateTime now = LocalDateTime.now();
+    if (open.isEmpty()) {
+      Attendance saved = attendance.save(new Attendance(user, now));
+      return new AttendanceResponse(
+          user.getId(), "PUNCH_IN", now, saved.getId(), null, "Punch-in recorded");
     }
-
-
-    @Override
-    public String punchIn(AttendanceRequest attendanceRequest){
-        if(attendanceRequest == null){
-            throw new RuntimeException("Attendance Request cannot be empty");
-        }
-
-        Optional<User> user = userRepository.findById(attendanceRequest.getUserId());
-
-        if(user.isEmpty()){
-            throw new RuntimeException("User not found");
-        }
-
-        LocalDate today = LocalDate.now();
-        LocalDateTime loginTime = LocalDateTime.now();
-
-        Optional<Attendance> existingAttendance = attendanceRepository.findByUserIdAndAttendanceDate(
-                attendanceRequest.getUserId(),
-                today
-        );
-
-        if(existingAttendance.isPresent()){
-           return "Attendance already marked for this day";
-        }
-
-        Attendance attendance = new Attendance(
-                user.get(),
-                today,
-                loginTime,
-                AttendanceStatus.PRESENT
-        );
-
-        attendanceRepository.save(attendance);
-
-        return "Attendance marked Successfully";
-
-    }
-
-
-    @Override
-    public String punchOut(AttendanceRequest attendanceRequest){
-        if(attendanceRequest == null){
-            throw new RuntimeException("Attendance Request cannot be empty");
-        }
-
-        LocalDate today = LocalDate.now();
-
-        Optional<Attendance> attendance = attendanceRepository.findByUserIdAndAttendanceDate(
-                attendanceRequest.getUserId(),
-                today);
-
-        if(attendance.isEmpty()){
-            return "Login attendance not found for today";
-        }
-
-        Attendance attendanceRecord = attendance.get();
-
-        if(attendanceRecord.getLogoutTime() != null){
-            return "Logout already marked for today";
-        }
-
-        LocalDateTime logoutTime = LocalDateTime.now();
-
-        attendanceRecord.setLogoutTime(logoutTime);
-
-        Duration duration = Duration.between(
-                attendanceRecord.getLoginTime(),
-                logoutTime);
-
-        long totalMinutes = duration.toMinutes();
-
-        if(totalMinutes>=480){
-            attendanceRecord.setStatus(AttendanceStatus.PRESENT);
-        }else{
-            attendanceRecord.setStatus(AttendanceStatus.ABSENT);
-        }
-        attendanceRepository.save(attendanceRecord);
-
-        return "Logout Successful, Total Working TIme:"
-                + totalMinutes / 60
-                + "hours"
-                + totalMinutes % 60
-                + "minutes";
-
-    }
+    Attendance session = open.getFirst();
+    if (Duration.between(session.getLoginTime(), now).compareTo(Duration.ofHours(20)) > 0)
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Open attendance session is older than 20 hours; contact HR to correct it");
+    session.punchOut(now);
+    attendance.save(session);
+    return new AttendanceResponse(
+        user.getId(),
+        "PUNCH_OUT",
+        now,
+        session.getId(),
+        Duration.between(session.getLoginTime(), now).toMinutes(),
+        "Punch-out recorded");
+  }
 }
-
